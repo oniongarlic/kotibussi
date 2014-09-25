@@ -1,3 +1,12 @@
+/**
+Kotibussi
+
+Apps4Finland consept demo
+
+Copyright Kaj-Michael Lang <milang@tal.org>
+GPLv2
+*/
+
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 #include <SPI.h>
@@ -82,6 +91,7 @@ void printTimeAt(int c, int r, int t) {
   int s=t-(m*60);
 
   Serial.println("***");
+  Serial.println(t);  
   Serial.println(m);  
   Serial.println(s);
   Serial.println("***");
