@@ -37,32 +37,30 @@ LiquidCrystal_I2C lcd(0x27,2,1,0,4,5,6,7);
 EthernetClient ethClient;
 
 void callback(char* topic, byte* payload, unsigned int length) {
-  lcd.clear();
-
-  Serial.println(topic);
-  Serial.println(length);
-  Serial.println((char *)payload);
-  
   String tmp; 
   payload[length]=0;
   tmp+=(char *)payload;
   
-  if (strcmp(topic, buss_now)) {
+  if (strcmp(topic, buss_now)==0) {
     nowsec=tmp.toInt();
-  } else if (strcmp(topic, buss_next)) {
+  } else if (strcmp(topic, buss_next)==0) {
     nextsec=tmp.toInt();
   }
-
-  Serial.println("NS");
-  Serial.println(nowsec);
-  Serial.println("NXT");
-  Serial.println(nextsec);
-  Serial.println("----");
     
-  updateLCD();  
+  updateTimes();  
 }
 
-void updateLCD() {
+void updateTimes() {
+  lcd.setCursor(9,0);
+  lcd.print("N:");
+  printTimeAt(10,0,nowsec);
+  
+  lcd.setCursor(9,1);
+  lcd.print("S:");
+  printTimeAt(10,1,nextsec);
+}
+
+void updateLines() {
   lcd.setCursor(0,0);
   lcd.print("BS:");
   lcd.print(buss_stop);
@@ -70,14 +68,6 @@ void updateLCD() {
   lcd.setCursor(0,1);
   lcd.print("L:");
   lcd.print(buss_line);
-  
-  lcd.setCursor(8,0);
-  lcd.print("N:");
-  printTimeAt(10,0,nowsec);
-  
-  lcd.setCursor(8,1);
-  lcd.print("S:");
-  printTimeAt(10,1,nextsec);
 }
 
 void printTimeAt(int c, int r, int t) {
@@ -90,12 +80,6 @@ void printTimeAt(int c, int r, int t) {
   int m=t/60;
   int s=t-(m*60);
 
-  Serial.println("***");
-  Serial.println(t);  
-  Serial.println(m);  
-  Serial.println(s);
-  Serial.println("***");
-  
   if (m<10)
     lcd.print("0");
   lcd.print(m);
@@ -107,33 +91,39 @@ void printTimeAt(int c, int r, int t) {
 
 PubSubClient client(server, 1883, callback, ethClient);
 
+int connectMQTT() {
+  if (client.connect("demo-")) {
+    // client.publish("test","hello world");
+    client.subscribe(buss_now);
+    client.subscribe(buss_next);
+    lcd.print("OK");
+    return 0;
+  }
+  lcd.print("ER");
+  return -1;  
+}
+
 void setup() {
   lcd.setBacklightPin(BACKLIGHT_PIN, POSITIVE);
   lcd.setBacklight(BACKLIGHT_ON); 
   lcd.begin(16,2);
   lcd.clear();
   lcd.print("TKB-AVSDemo");  
-  delay(1000);
   
   Serial.begin(9600);
   Serial.println();
   
-  Ethernet.begin(mac, ip);
+  Ethernet.begin(mac, ip);  
   
+  do {
+    delay(500);
+    lcd.clear();
+    lcd.print("Connecting...");
+    Serial.println("C");
+  } while(connectMQTT()<0);
+  delay(500);
   lcd.clear();
-  
-  Serial.println("C");
-  if (client.connect("demo-")) {
-    // client.publish("test","hello world");
-    client.subscribe(buss_now);
-    client.subscribe(buss_next);
-    lcd.print("OK");
-    Serial.println("OK");
-  } else {
-    lcd.print("Er");
-    Serial.println("F");
-  }
-  delay(1000);
+  updateLines();
 }
 
 void loop() {  
