@@ -7,6 +7,14 @@ Copyright Kaj-Michael Lang <milang@tal.org>
 GPLv2
 */
 
+/*
+ * LCD display
+ *
+ *   0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 
+ * 0 B P : n n n n     N :  m  m  :  s  s
+ * 1 B S : x x x       S :  m  m  :  s  s
+ */
+
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 #include <SPI.h>
@@ -36,6 +44,7 @@ int nextsec=-1;
 LiquidCrystal_I2C lcd(0x27,2,1,0,4,5,6,7);
 EthernetClient ethClient;
 
+
 void callback(char* topic, byte* payload, unsigned int length) {
   String tmp; 
   payload[length]=0;
@@ -51,23 +60,21 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 void updateTimes() {
-  lcd.setCursor(9,0);
-  lcd.print("N:");
-  printTimeAt(10,0,nowsec);
-  
-  lcd.setCursor(9,1);
-  lcd.print("S:");
-  printTimeAt(10,1,nextsec);
+  printTimeAt(11,0,nowsec);
+  printTimeAt(11,1,nextsec);
 }
 
 void updateLines() {
   lcd.setCursor(0,0);
   lcd.print("BS:");
   lcd.print(buss_stop);
-
   lcd.setCursor(0,1);
   lcd.print("L:");
   lcd.print(buss_line);
+  lcd.setCursor(9,0);
+  lcd.print("N:");
+  lcd.setCursor(9,1);
+  lcd.print("S:");
 }
 
 void printTimeAt(int c, int r, int t) {
