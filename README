@@ -1,0 +1,12 @@
+Kotibussi - A home buss information display concept demo
+
+The idea is to have a simple, very easy to use, always visible screen with
+the information about the buss(es) you use. The device itself does not
+poll any information, instead it relies on a MQTT server to push the information.
+
+The hardware part of the demo is built on a Arduino Uno with an Ethernet Shield
+(not the wiznet kind, don't have one, yet) and a simple 16x2 character LCD display.
+
+
+
+
